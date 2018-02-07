@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Using takeWhile() for Stream Operations</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+        tr {
+            border-bottom: 1px solid black;
+        }
+        </style>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/4.1.0/rx.all.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+    </head>
+    <body>
+        <!--[if lt IE 7]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+        <h1>Using takeWhile() for Stream Operations</h1>
+        <table>
+                <thead>
+                  <tr>
+                    <td>
+                      <b>Average Length</b>:
+                    </td>
+                    <td id="average-length">
+                      N/A
+                    </td>
+                  </tr>
+                </thead>
+              </table>
+        <script>
+            "use strict";
+             
+            // Helper Method
+            const ENDPOINT = 'users',
+                  ROOT = 'https://jsonplaceholder.typicode.com';
+            const makeRequest = function makeRequest(path, item){
+                return new Promise(function(resolve, reject) {
+                    path ? (path = '/' + path) : path = '/';
+                    item ? (item = '/' + item) : item = '/';
+                    const url = ROOT + path + item;
+
+                    $.getJSON(url)
+                        .done(function(data){
+                            resolve(data);
+                        })
+                        .fail(function(){
+                            reject();
+                        })
+                });
+            }; // end of makeRequest
+
+            const PROMISE = makeRequest(ENDPOINT),
+                  source = Rx.Observable.fromPromise(PROMISE)
+                                        .flatMap(Rx.Observable.from);
+            source.map((user) => user.website)
+                    .filter((website) => website.endsWith('net') || website.endsWith('org'))
+                    .scan((data, website) => {
+                        return {
+                            count: data.count += 1,
+                            name_length: data.name_length += website.length
+                        }
+                    }, {
+                        count: 0,
+                        name_length: 0
+                    })
+                    .takeWhile((data) => data.count < 3)
+                    .subscribe(data => {
+                        const average_length = data.name_length / data.count;
+                        $('#average-length').html(average_length);
+                        console.log(average_length);
+                    });
+        </script>
+    </body>
+</html>
