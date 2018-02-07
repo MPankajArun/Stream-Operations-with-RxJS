@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Using concat() and merge() </title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            table {
+                padding: 14px;
+            }
+
+            #concat-table {
+                float : left
+            }
+        </style>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/4.1.0/rx.all.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+    </head>
+    <body>
+        <!--[if lt IE 7]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+        <h1>Combining streams with concat() and merge()</h1>
+        <table id="concat-table">
+        <thead>
+            <tr>
+            <td>
+                <b>Concatenated Stream</b>
+            </td>
+            </tr>
+        </thead>
+        <tbody id="concat-table-body">
+        </tbody>
+        </table>
+
+        <table id="merge-table">
+        <thead>
+            <tr>
+            <td>
+                <b>Merged Stream</b>
+            </td>
+            </tr>
+        </thead>
+        <tbody id="merge-table-body">
+        </tbody>
+        </table>
+
+        <script>
+            'use strict';
+            const source1 = Rx.Observable.interval(100)
+                                .map(val => `Source 1: ${val}`)
+                                .take(5);
+            
+            const source2 = Rx.Observable.interval(100)
+                                .map(val => `Source 2: ${val * 10}`)
+                                .take(5);
+            const concat_table = $('#concat-table-body'),
+                  merge_table = $('#merge-table-body');
+            
+            source1
+                .concat(source2)
+                .subscribe(value => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = value;
+
+                    concat_table.append(row);
+                });
+            
+            source1
+                .merge(source2)
+                .subscribe(value => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = value;
+
+                    merge_table.append(row);
+                });
+            
+
+            /* 
+                The concat() stream will print all of the values from source1 first, 
+                and only begin printing values from source2 after source1 completes.
+
+                The merge() stream will print values from source1 and source2 as it receives them: It
+                won’t wait for the first stream to complete before emitting values from the second.
+            */
+        </script>
+    </body>
+</html>
