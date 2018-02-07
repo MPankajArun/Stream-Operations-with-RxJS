@@ -1,4 +1,4 @@
-## Using switch()
+## Using switch() , combineLatest() and zip()
 Often, we want to listen to an Observable emitting Observables, but only pay attention to the latest emission from the source.
 
 To extend the Facebook Messenger analogy further, switch() is the case where you . . . Well, switch who you respond to, based on who’s currently sending messages.

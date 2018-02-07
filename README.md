@@ -1,10 +1,12 @@
 ## Operations on Simple Streams
 The fundamental functions on simple streams—those that emit simple values, like strings—include:
 
-map()
-filter()
-reduce()
-take() / takeWhile()
+1. map()
+2. filter()
+3. reduce()
+4. take() / takeWhile()
+5. concat() & merge()
+6. switch()
 
 With the exception of take() and takeWhile(), these are analogous to JavaScript’s higher-order array functions.
 

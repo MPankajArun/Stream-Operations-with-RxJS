@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Using switch() </title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            table {
+                padding: 14px;
+            }
+        </style>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/4.1.0/rx.all.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+    </head>
+    <body>
+        <!--[if lt IE 7]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+        <h1>Switchin' It Up</h1>
+    
+        <select id="js-select-endpoint">
+            <option value="users">Users</option>
+            <option value="posts">Posts</option>
+        </select>
+
+        <select id="js-select-id">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+        </select>
+        
+        <br>
+        <pre id="js-response-box">
+        
+        </pre>
+        <br>
+    
+        <script>
+            'use strict';
+            // Helper method
+            const ENDPOINT = 'users',
+                  ROOT = 'https://jsonplaceholder.typicode.com';
+            const makeRequest = function makeRequest(path, item){
+                return new Promise(function(resolve, reject) {
+                    path ? (path = '/' + path) : path = '/';
+                    item ? (item = '/' + item) : item = '/';
+                    const url = ROOT + path + item;
+
+                    $.getJSON(url)
+                        .done(function(data){
+                            resolve(data);
+                        })
+                        .fail(function(){
+                            reject();
+                        })
+                });
+            }; // end of makeRequest
+
+            const select = document.getElementById('js-select-endpoint'),
+                  id_select = document.getElementById('js-select-id'),
+                  response_box = document.getElementById('js-response-box');
+            
+            // STREAM of button click on ENDPOINT selection
+            const endpoint_stream = Rx.Observable.fromEvent(select, 'click')
+                                        .map(event => event.target)
+                                        .map(target => (target.options[target.selectedIndex].text.toLowerCase()));
+            const id_stream = Rx.Observable.fromEvent(id_select, 'click')
+                                        .map(event => event.target)
+                                        .map(target => (target.options[target.selectedIndex].text.toLowerCase()));
+            
+                                // To wait until BOTH fields get updated, use zip:
+                                //   endpoint_stream.zip(id_stream) 
+            const request_stream = endpoint_stream.combineLatest(id_stream)  
+                                // Emits ARRAY: First element is from endpoint_stream, second is from id_stream
+                                            .map(data => makeRequest(data[0],data[1]))
+                                // Only hit server for DIFFERENT requests
+                                            .distinctUntilChanged()
+                                // Take only the last selections made every second
+                                            .debounce(1000)
+                                // Listen to the most RECENT selection
+                                            .switch()
+                                            .subscribe(response => {
+                                                response_box.innerHTML = JSON.stringify(response,null,2);
+                                            });
+        </script>
+    </body>
+</html>

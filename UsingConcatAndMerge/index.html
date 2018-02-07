@@ -50,6 +50,16 @@
         </tbody>
         </table>
 
+        <pre>
+
+                
+        The <code>concat()</code> stream will print all of the values from source1 first, 
+        and only begin printing values from source2 after source1 completes.
+
+        The <code>merge()</code> stream will print values from source1 and source2 as it receives them: It
+        won’t wait for the first stream to complete before emitting values from the second.
+            
+        </pre>
         <script>
             'use strict';
             const source1 = Rx.Observable.interval(100)
