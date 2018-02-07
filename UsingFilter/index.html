@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Using filter() for Stream Operations</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+        tr {
+            border-bottom: 1px solid black;
+        }
+        </style>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/4.1.0/rx.all.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+    </head>
+    <body>
+        <!--[if lt IE 7]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+        <h1>Using filter() for Stream Operations</h1>
+        <table>
+        <thead>
+            <tr>
+            <td>
+                <b>Emails</b>
+            </td>
+            </tr>
+        </thead>
+        <tbody id="email-table-body">
+        </tbody>
+        </table>
+        <script>
+            "use strict";
+             
+            // Helper Method
+            const ENDPOINT = 'users',
+                  ROOT = 'https://jsonplaceholder.typicode.com';
+            const makeRequest = function makeRequest(path, item){
+                return new Promise(function(resolve, reject) {
+                    path ? (path = '/' + path) : path = '/';
+                    item ? (item = '/' + item) : item = '/';
+                    const url = ROOT + path + item;
+
+                    $.getJSON(url)
+                        .done(function(data){
+                            resolve(data);
+                        })
+                        .fail(function(){
+                            reject();
+                        })
+                });
+            }; // end of makeRequest
+
+            const PROMISE = makeRequest(ENDPOINT),
+                  source = Rx.Observable.fromPromise(PROMISE)
+                                        .flatMap(Rx.Observable.from);
+            source.map((user) => user.website)
+                    .filter(website => website.endsWith('net') || website.endsWith('org'))
+                    .subscribe(website => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = website;
+
+                        $('#email-table-body').append(row);
+                        console.log(website);
+                    });
+        </script>
+    </body>
+</html>
